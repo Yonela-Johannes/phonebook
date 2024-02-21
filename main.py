@@ -1,6 +1,8 @@
 # Libraries
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
+from crud import CRUD
 
 class PhoneBook:
     def __init__(self):
@@ -28,6 +30,8 @@ class PhoneBook:
         self.window.resizable(width=FALSE, height=FALSE)
         
     def main(self):
+        # Init CRUD method
+        crud_method = CRUD
         # Frames
         frame_up = Frame(self.window, width=self.width, height=self.frame_height1, bg=self.PRIMARY)
         frame_up.grid(row=0, column=0, padx=0, pady=1)
@@ -44,7 +48,7 @@ class PhoneBook:
             global tree
             
             list_header = ['Name', 'Gender', 'Telephone', 'Email']
-            demo_list = [['Hlomla', "Female", '0693525256', 'hlomla@gmail.com']]
+            demo_list = crud_method.view()
             
             tree = ttk.Treeview(frame_table, selectmode="extended", columns=list_header, show="headings")
             
@@ -75,7 +79,105 @@ class PhoneBook:
        
         show()
         
+        # Add data
+        def insert():
+            Name = entry_name.get()
+            Gender = combo_gender.get()
+            Telephone = entry_telephone.get()
+            Email = entry_email.get()
+            
+            data = [Name, Gender, Telephone, Email]
+            
+            if Name == None or Gender == None or Telephone == None or Email == None:
+                messagebox.showwarning('Data Required', 'Please fill in all fields')
+            else:
+                CRUD.add(data)
+                messagebox.showinfo('Successfully', 'Phone details added successfully')
+                entry_name.delete(0, 'end')
+                entry_email.delete(0, 'end')
+                combo_gender.delete(0, 'end')
+                entry_telephone.delete(0, 'end')
+                
+            show()
+            
+        # Update data
+        def set_update():
+            try:
+                tree_data = tree.focus()
+                tree_dictionary = tree.item(tree_data)
+                tree_list = tree_dictionary['values']
+                
+                Name = str(tree_list[0])
+                Gender = str(tree_list[1])
+                Telephone = str(tree_list[2])
+                Email = str(tree_list[3])
+                
+                entry_name.insert(0, Name)
+                entry_email.insert(0, Gender)
+                combo_gender.insert(0, Telephone)
+                entry_telephone.insert(0, Email)
+                
+                def confirm():
+                    new_name = entry_name.get()
+                    new_gender = combo_gender.get()
+                    new_telephone =  entry_telephone.get()
+                    new_email = entry_email.get()
+                    
+                    data = [new_name, new_gender, new_telephone, new_email]
+                    
+                    crud_method.update(data)
+                    
+                    messagebox.showinfo('Successs',  "Phone details updated successfully")
+                    
+                    entry_name.delete(0, 'end')
+                    entry_email.delete(0, 'end')
+                    combo_gender.delete(0, 'end')
+                    entry_telephone.delete(0, 'end')
+                    
+                    for widget in frame_table.winfo_children():
+                        widget.destroy()
+                        
+                    button_confirm.destroy()
+                    
+                    show()
+                    
+                button_confirm = Button(frame_down, text="Confirm", height=1, font=('Ivy 8 bold'), bg=self.SECONDARY, command=confirm)
+                button_confirm.place(x=264, y=160)
+                
+                
+            except:
+                messagebox.showerror('Error',  "Select phone details from list")
+                
         
+        def to_remove():
+            try:
+                tree_data = tree.focus()
+                tree_dictionary = tree.item(tree_data)
+                tree_list = tree_dictionary['values']
+                tree_telephone = str(tree_list[2])
+                
+                crud_method.remove(tree_telephone)
+                
+                messagebox.showinfo('Successs',  "Phone details deleted successfully")
+                
+            except:
+                messagebox.showinfo('Error',  "Select number from phone details list")
+            
+            show()
+            
+        def to_search():
+            telephone = search_entry.get()
+            
+            data = crud_method.search(telephone)
+            
+            def delete_command():
+                tree.delete(*tree.get_children())
+                
+            delete_command()
+            
+            for item in data:
+                tree.insert('', 'end', values=item)
+                
         # frame up widgets
         app_name = Label(frame_up, text="Phonebook", height=1, font=('Arial 16 bold'), bg=self.WHITE, anchor=NW)
         app_name.place(x=5, y=5)
@@ -84,7 +186,7 @@ class PhoneBook:
         search_entry = Entry(frame_up, width=25, justify='left', highlightthickness=1, relief='solid')
         search_entry.place(x=285, y=6)
         # search button
-        search_button = Button(frame_up, text="Search", height=1, font=('Ivy 8 bold'), bg=self.SECONDARY)
+        search_button = Button(frame_up, text="Search", height=1, font=('Ivy 8 bold'), bg=self.SECONDARY, command=to_search)
         search_button.place(x=445, y=6)
         
         # frame down 
@@ -110,19 +212,19 @@ class PhoneBook:
         entry_email.place(x=80, y=110)
         
         # view button
-        view_button = Button(frame_down, text="View", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY)
+        view_button = Button(frame_down, text="View", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY, command=show)
         view_button.place(x=12, y=160)
         
         # add button
-        add_button = Button(frame_down, text="Add", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY)
+        add_button = Button(frame_down, text="Add", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY, command=insert)
         add_button.place(x=80, y=160)
         
         # update button
-        update_button = Button(frame_down, text="Update", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY)
+        update_button = Button(frame_down, text="Update", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY, command=set_update)
         update_button.place(x=148, y=160)
         
         # delete button
-        delete_button = Button(frame_down, text="Delete", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY)
+        delete_button = Button(frame_down, text="Delete", width=self.button_width, height=1, font=('Ivy 8 bold'), bg=self.SECONDARY, command=to_remove)
         delete_button.place(x=216, y=160)
         
         self.window.mainloop()

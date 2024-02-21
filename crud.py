@@ -1,5 +1,4 @@
 import sys
-
 import csv
 
 class CRUD:
@@ -17,7 +16,7 @@ class CRUD:
             reader = csv.reader(file)
             for row in reader:
                 data.append(row)
-        print(data)
+        return data
 
     # remove user
     def remove(i):
@@ -36,7 +35,10 @@ class CRUD:
                 
                 for element in row:
                     if element == telephone:
+                        print("ELEMENT", element)
+                        print("ROW", element)
                         new_list.remove(row)
+        print("LIST", new_list)
         save(new_list)
         
     # update user
@@ -45,7 +47,7 @@ class CRUD:
         def update_newlist(j):
             with open('data.csv', 'w', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow(j)
+                writer.writerow(i)
         
         new_list = []
         telephone = i[0]
@@ -55,10 +57,10 @@ class CRUD:
                 new_list.append(row)
                 for element in row:
                     if element == telephone:
-                        name = i[1]
-                        gender = i[2]
-                        telephone = i[3]
-                        email = i[4]
+                        name = i[0]
+                        gender = i[1]
+                        telephone = i[2]
+                        email = i[3]
                         
                         data = [name, gender, telephone, email]
                         index = new_list.index(row)
